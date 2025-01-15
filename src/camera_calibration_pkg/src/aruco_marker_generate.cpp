@@ -61,14 +61,14 @@ int main(int argc, char *argv[])
 
     cv::Size image_size = cv::Size(image_width, image_height);
 
-    cv::Mat cameraMatrix, disCoffes, newCameraMatrix, newDisCoffes;
+    cv::Mat cameraMatrix, distCoeffs, newCameraMatrix, newDisCoffes;
     fs["cameraMatrix"] >> cameraMatrix;
-    fs["disCoffes"] >> disCoffes;
+    fs["distCoeffs"] >> distCoeffs;
     fs["newCameraMatrix"] >> newCameraMatrix;
     fs["newDisCoffes"] >> newDisCoffes;
     fs.release();
     std::cout << cameraMatrix << std::endl;
-    std::cout << disCoffes << std::endl;
+    std::cout << distCoeffs << std::endl;
     std::cout << image_size << std::endl;
 
     cv::aruco::DICT_6X6_250;

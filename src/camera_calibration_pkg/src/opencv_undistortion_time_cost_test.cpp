@@ -32,12 +32,12 @@ int main(int argc, char **argv) {
 
     Size image_size = Size(image_width, image_height);
 
-    Mat cameraMatrix, disCoffes;
+    Mat cameraMatrix, distCoeffs;
     fs["cameraMatrix"] >> cameraMatrix;
-    fs["disCoffes"] >> disCoffes;
+    fs["distCoeffs"] >> distCoeffs;
     fs.release();
     std::cout << cameraMatrix << std::endl;
-    std::cout << disCoffes << std::endl;
+    std::cout << distCoeffs << std::endl;
     std::cout << image_size << std::endl;
 
 
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 
         srcImg = camCal.get_src_image(i);
 
-        undistort(srcImg, undistortImg, cameraMatrix, disCoffes);
+        undistort(srcImg, undistortImg, cameraMatrix, distCoeffs);
 
         printf("Count: %d\n", j);
     }

@@ -59,14 +59,14 @@ namespace cct{
             vector<vector<cv::Point2f>> imagePoints;
 
             cv::Mat cameraMatrix; 
-            cv::Mat disCoffes; 
+            cv::Mat distCoeffs; 
             cv::Mat rvecs; 
             cv::Mat tvecs;
 
             cv::Mat newCameraMatrixAlpha1;
             cv::Mat newDisCoffesAlpha1; 
             cv::Mat newCameraMatrixAlpha0;
-            cv::Mat newDisCoffesAlpha0; 
+            cv::Mat newDistCoeffsAlpha0; 
             vector<vector<cv::Point3f>> newObjectPoints;
             vector<vector<cv::Point2f>> newImagePoints;
             
@@ -81,19 +81,19 @@ namespace cct{
 
             CamCalExt();
             CamCalExt(CamCalChessboard camCalCB);
-            CamCalExt(cv::Mat cameraMatrix, cv::Mat disCoffes);
+            CamCalExt(cv::Mat cameraMatrix, cv::Mat distCoeffs);
 
             bool set_points_n_points(vector<cv::Point3f> worldPoints, vector<cv::Point2f> imagePoints);
 
-            bool set_intrinsics(cv::Mat cameraMatrix, cv::Mat disCoffes);
+            bool set_intrinsics(cv::Mat cameraMatrix, cv::Mat distCoeffs);
             bool set_extrinsics(cv::Mat rvec, cv::Mat tvec);
 
             vector<cv::Mat> ext_cal_one_frame();
 
             void mapping_3d_to_2d_one_frame(vector<cv::Point3f> &worldPoints, vector<cv::Point2f> &imagePoints, cv::Mat rvec = cv::Mat(), cv::Mat tvec = cv::Mat(), 
-                                            cv::Mat cameraMatrix = cv::Mat(), cv::Mat disCoffes = cv::Mat());
+                                            cv::Mat cameraMatrix = cv::Mat(), cv::Mat distCoeffs = cv::Mat());
             // void mapping_points_3d_to_2d(vector<cv::Point3f> &worldPoints, vector<cv::Point2f> &imagePoints, cv::Mat rvec, cv::Mat tvec, 
-            //                                 cv::Mat cameraMatrix, cv::Mat disCoffes = cv::Mat());
+            //                                 cv::Mat cameraMatrix, cv::Mat distCoeffs = cv::Mat());
 
         private:
 
@@ -104,7 +104,7 @@ namespace cct{
 
 
             cv::Mat cameraMatrix;
-            cv::Mat disCoffes;
+            cv::Mat distCoeffs;
             cv::Mat rvec;
             cv::Mat tvec;
 

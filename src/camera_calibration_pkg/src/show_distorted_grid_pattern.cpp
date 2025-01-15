@@ -27,9 +27,9 @@ int main(int argc, char *argv[])
 
     cv::Size image_size = cv::Size(image_width, image_height);
 
-    cv::Mat cameraMatrix, disCoffes;
+    cv::Mat cameraMatrix, distCoeffs;
     fs["cameraMatrix"] >> cameraMatrix;
-    fs["disCoffes"] >> disCoffes;
+    fs["distCoeffs"] >> distCoeffs;
     fs.release();
 
 
@@ -66,8 +66,8 @@ int main(int argc, char *argv[])
     cv::Mat map1, map2;
     cv::Mat newMap1, newMap2;
 
-    cv::Mat newCameraMatrix = cv::getOptimalNewCameraMatrix(cameraMatrix, disCoffes, image_size, 1.0);
-    cv::initUndistortRectifyMap(cameraMatrix, disCoffes, cv::Mat(), newCameraMatrix, image_size, CV_32FC2, map1, map2);
+    cv::Mat newCameraMatrix = cv::getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, image_size, 1.0);
+    cv::initUndistortRectifyMap(cameraMatrix, distCoeffs, cv::Mat(), newCameraMatrix, image_size, CV_32FC2, map1, map2);
     newMap1.create(map1.size(), CV_32FC2);
     newMap2.create(map2.size(), CV_8U);
 

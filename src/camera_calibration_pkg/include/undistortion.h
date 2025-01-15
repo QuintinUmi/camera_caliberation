@@ -14,13 +14,13 @@ class Undistortion{
     public:
 
         Undistortion();
-        Undistortion(cv::Mat cameraMatrix, cv::Mat disCoffes, cv::Size image_size, double alpha = 1.0);
+        Undistortion(cv::Mat cameraMatrix, cv::Mat distCoeffs, cv::Size image_size, double alpha = 1.0);
         bool undistortion_process(cv::Mat &srcImage, cv::Mat &undistortedImage);
 
     private:
 
         cv::Mat cameraMatrix;
-        cv::Mat disCoffes;
+        cv::Mat distCoeffs;
         cv::Size image_size;
         double alpha;
 

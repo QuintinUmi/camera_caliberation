@@ -38,7 +38,7 @@ bool CamCalChessboard::get_images_from_path(string path, string image_format)
     std::cout << "Path: " << path <<std::endl;
     cv::String searchPath = path + string("*.") + image_format;
     this->searchPath = searchPath;
-    
+
     cv::glob(searchPath, this->imagePaths);
 
     if(this->imagePaths.size()){
@@ -147,7 +147,7 @@ bool CamCalChessboard::calibration_process(bool cornerShow, int criteriaIterTime
                         this->imgSize, 
 
                         this->cameraMatrix, 
-                        this->disCoffes,
+                        this->distCoeffs,
                         cache1, cache2);
 
     printf("Finished!\n");
@@ -158,8 +158,8 @@ bool CamCalChessboard::calibration_process(bool cornerShow, int criteriaIterTime
     cv::Mat srcImage, undistortedImage;
     cv::Mat newCamMat, map1, map2;
 
-    newCamMat = cv::getOptimalNewCameraMatrix(this->cameraMatrix, this->disCoffes, this->imgSize, 1.0);
-    cv::initUndistortRectifyMap(this->cameraMatrix, this->disCoffes, cv::Mat(), newCamMat, this->imgSize, CV_32FC2, map1, map2);
+    newCamMat = cv::getOptimalNewCameraMatrix(this->cameraMatrix, this->distCoeffs, this->imgSize, 1.0);
+    cv::initUndistortRectifyMap(this->cameraMatrix, this->distCoeffs, cv::Mat(), newCamMat, this->imgSize, CV_32FC2, map1, map2);
 
     for(int i = 0; i < this->imagePaths.size(); i++)
     {
@@ -209,8 +209,8 @@ bool CamCalChessboard::calibration_process(bool cornerShow, int criteriaIterTime
     srcImage = cv::Mat(), undistortedImage = cv::Mat();
     newCamMat = cv::Mat(), map1 = cv::Mat(), map2 = cv::Mat();
 
-    newCamMat = cv::getOptimalNewCameraMatrix(this->cameraMatrix, this->disCoffes, this->imgSize, 0.0);
-    cv::initUndistortRectifyMap(this->cameraMatrix, this->disCoffes, cv::Mat(), newCamMat, this->imgSize, CV_32FC2, map1, map2);
+    newCamMat = cv::getOptimalNewCameraMatrix(this->cameraMatrix, this->distCoeffs, this->imgSize, 0.0);
+    cv::initUndistortRectifyMap(this->cameraMatrix, this->distCoeffs, cv::Mat(), newCamMat, this->imgSize, CV_32FC2, map1, map2);
 
     for(int i = 0; i < this->imagePaths.size(); i++)
     {
@@ -245,7 +245,7 @@ bool CamCalChessboard::calibration_process(bool cornerShow, int criteriaIterTime
                         this->imgSize, 
 
                         this->newCameraMatrixAlpha0, 
-                        this->newDisCoffesAlpha0,
+                        this->newDistCoeffsAlpha0,
                         cache1, cache1);
 
     printf("Finished!\n");
@@ -255,9 +255,40 @@ bool CamCalChessboard::calibration_process(bool cornerShow, int criteriaIterTime
     return true;
 }
 
+// bool CamCalChessboard::save_calibration_parm_yaml(string savePath)
+// {
+
+//     printf("Intrinsics & Extrinsics Parameters Saving...");
+//     fflush(stdout); 
+    
+//     savePath = savePath + "calibration_param.yaml";
+
+//     cv::FileStorage fs(savePath ,cv::FileStorage::WRITE); 
+
+//     time_t now = time(nullptr);
+//     fs << "calibrationTimeChar" << ctime(&now);
+//     fs << "calibrationTime_t" << int(now);
+//     fs << "imageWidth" << this->imgSize.width;
+//     fs << "imageHeight" << this->imgSize.height;
+//     fs << "cameraMatrix" << this->cameraMatrix;
+//     fs << "distCoeffs" << this->distCoeffs;
+//     // fs << "rvecs" << this->rvecs;
+//     // fs << "tvecs" << this->tvecs;
+
+//     fs << "newCameraMatrixAlpha1" << this->newCameraMatrixAlpha1;
+//     fs << "newDisCoffesAlpha1" << this->newDisCoffesAlpha1;
+//     fs << "newCameraMatrixAlpha0" << this->newCameraMatrixAlpha0;
+//     fs << "newDistCoeffsAlpha0" << this->newDistCoeffsAlpha0;
+
+//     fs.release(); 
+
+//     printf("Finished!\n");
+     
+//     return true;
+// }
+
 bool CamCalChessboard::save_calibration_parm_yaml(string savePath)
 {
-
     printf("Intrinsics & Extrinsics Parameters Saving...");
     fflush(stdout); 
     
@@ -271,14 +302,24 @@ bool CamCalChessboard::save_calibration_parm_yaml(string savePath)
     fs << "imageWidth" << this->imgSize.width;
     fs << "imageHeight" << this->imgSize.height;
     fs << "cameraMatrix" << this->cameraMatrix;
-    fs << "disCoffes" << this->disCoffes;
-    // fs << "rvecs" << this->rvecs;
-    // fs << "tvecs" << this->tvecs;
+
+    // 检查 distCoeffs 是否有至少五个元素
+    if (this->distCoeffs.total() >= 5) {
+        // 创建一个新的 1x4 矩阵
+        cv::Mat distCoeffsReduced(1, 4, CV_64F);
+        for (int i = 0; i < 4; i++) {
+            distCoeffsReduced.at<double>(0, i) = this->distCoeffs.at<double>(0, i);
+        }
+        fs << "distCoeffs" << distCoeffsReduced;
+    } else {
+        // 如果原始 distCoeffs 不足五个元素，直接保存
+        fs << "distCoeffs" << this->distCoeffs;
+    }
 
     fs << "newCameraMatrixAlpha1" << this->newCameraMatrixAlpha1;
     fs << "newDisCoffesAlpha1" << this->newDisCoffesAlpha1;
     fs << "newCameraMatrixAlpha0" << this->newCameraMatrixAlpha0;
-    fs << "newDisCoffesAlpha0" << this->newDisCoffesAlpha0;
+    fs << "newDistCoeffsAlpha0" << this->newDistCoeffsAlpha0;
 
     fs.release(); 
 
@@ -301,8 +342,8 @@ CamCalExt::CamCalExt(){
 CamCalExt::CamCalExt(CamCalChessboard camCalCB){
 
 }
-CamCalExt::CamCalExt(cv::Mat cameraMatrix, cv::Mat disCoffes){
-    this->set_intrinsics(cameraMatrix, disCoffes);
+CamCalExt::CamCalExt(cv::Mat cameraMatrix, cv::Mat distCoeffs){
+    this->set_intrinsics(cameraMatrix, distCoeffs);
 }
 
 bool CamCalExt::set_points_n_points(vector<cv::Point3f> worldPoints, vector<cv::Point2f> imagePoints)
@@ -312,10 +353,10 @@ bool CamCalExt::set_points_n_points(vector<cv::Point3f> worldPoints, vector<cv::
     return true;
 }
 
-bool CamCalExt::set_intrinsics(cv::Mat cameraMatrix, cv::Mat disCoffes)
+bool CamCalExt::set_intrinsics(cv::Mat cameraMatrix, cv::Mat distCoeffs)
 {
     this->cameraMatrix = cameraMatrix;
-    this->disCoffes = disCoffes;
+    this->distCoeffs = distCoeffs;
     return true;
 }
 bool CamCalExt::set_extrinsics(cv::Mat rvec, cv::Mat tvec)
@@ -328,7 +369,7 @@ bool CamCalExt::set_extrinsics(cv::Mat rvec, cv::Mat tvec)
 vector<cv::Mat> CamCalExt::ext_cal_one_frame()
 {
     cv::Mat rvec, tvec;
-    cv::solvePnP(this->worldPoints, this->imagePoints, this->cameraMatrix, this->disCoffes, rvec, tvec);
+    cv::solvePnP(this->worldPoints, this->imagePoints, this->cameraMatrix, this->distCoeffs, rvec, tvec);
     vector<cv::Mat> extrinsics_matrix;
     extrinsics_matrix.emplace_back(rvec);
     extrinsics_matrix.emplace_back(tvec);
@@ -336,7 +377,7 @@ vector<cv::Mat> CamCalExt::ext_cal_one_frame()
 }
 
 void CamCalExt::mapping_3d_to_2d_one_frame(vector<cv::Point3f> &worldPoints, vector<cv::Point2f> &imagePoints, cv::Mat rvec, cv::Mat tvec, 
-                                            cv::Mat cameraMatrix, cv::Mat disCoffes)
+                                            cv::Mat cameraMatrix, cv::Mat distCoeffs)
 {
     if(rvec.empty()){
         rvec = this->rvec;
@@ -347,8 +388,8 @@ void CamCalExt::mapping_3d_to_2d_one_frame(vector<cv::Point3f> &worldPoints, vec
     if(cameraMatrix.empty()){
         cameraMatrix = this->cameraMatrix;
     }
-    if(disCoffes.empty()){
-        disCoffes = this->disCoffes;
+    if(distCoeffs.empty()){
+        distCoeffs = this->distCoeffs;
     }
     
     cv::projectPoints(worldPoints, rvec, tvec, cameraMatrix, cv::Mat(), imagePoints);
@@ -361,7 +402,7 @@ void CamCalExt::mapping_3d_to_2d_one_frame(vector<cv::Point3f> &worldPoints, vec
 
 
 // void CamCalExt::mapping_points_3d_to_2d(vector<cv::Point3f> &worldPoints, vector<cv::Point2f> &pixelPoints, cv::Mat rvec, cv::Mat tvec, 
-//                                             cv::Mat cameraMatrix, cv::Mat disCoffes)
+//                                             cv::Mat cameraMatrix, cv::Mat distCoeffs)
 // {   
 //     double thetaX = rvec.at<double>(0), thetaY = rvec.at<double>(1), thetaZ = rvec.at<double>(2);
     

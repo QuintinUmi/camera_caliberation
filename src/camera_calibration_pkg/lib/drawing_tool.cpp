@@ -33,20 +33,20 @@ using namespace drt;
 //     this->scaleY = 1.0;
 //     this->scaleZ = 1.0;
 // }
-Draw3D::Draw3D(float unitLength ,float scaleX, float scaleY, float scaleZ, cv::Mat cameraMatrix, cv::Mat disCoffes)
+Draw3D::Draw3D(float unitLength ,float scaleX, float scaleY, float scaleZ, cv::Mat cameraMatrix, cv::Mat distCoeffs)
 {
     this->unitLength = unitLength;
     this->scaleX = scaleX;
     this->scaleY = scaleY;
     this->scaleZ = scaleZ;
     this->setCameraMatrix = cameraMatrix;
-    this->setDisCoffes = disCoffes;
+    this->setDisCoffes = distCoeffs;
 
 }
-Draw3D::Draw3D(cv::Mat cameraMatrix, cv::Mat disCoffes)
+Draw3D::Draw3D(cv::Mat cameraMatrix, cv::Mat distCoeffs)
 {
     this->setCameraMatrix = cameraMatrix;
-    this->setDisCoffes = disCoffes;
+    this->setDisCoffes = distCoeffs;
 }
 
 void Draw3D::set_unitlen(float unitLength){
@@ -104,7 +104,7 @@ vector<vector<cv::Point3f>> Draw3D::draw_ortho_coordinate_3d(float cx, float cy,
 
     return coordinate;
 }
-void Draw3D::draw_ortho_coordinate_2d(cv::Mat &imgInputOutput, cv::Mat cameraMatrix, cv::Mat disCoffes, cv::Mat rvec, cv::Mat tvec,
+void Draw3D::draw_ortho_coordinate_2d(cv::Mat &imgInputOutput, cv::Mat cameraMatrix, cv::Mat distCoeffs, cv::Mat rvec, cv::Mat tvec,
                                         float cx, float cy, float cz)
 {
     vector<cv::Point3f> p3d;
@@ -114,7 +114,7 @@ void Draw3D::draw_ortho_coordinate_2d(cv::Mat &imgInputOutput, cv::Mat cameraMat
     this->write_in(p3d, cx, cy, cz + this->unitLength);
 
     vector<cv::Point2f> p2d;
-    cv::projectPoints(p3d, rvec, tvec, cameraMatrix, disCoffes, p2d);
+    cv::projectPoints(p3d, rvec, tvec, cameraMatrix, distCoeffs, p2d);
     
     cv::line(imgInputOutput, p2d[0], p2d[1], cv::Scalar(0, 0, 255), 3);
     cv::line(imgInputOutput, p2d[0], p2d[2], cv::Scalar(0, 255, 0), 3);
@@ -226,11 +226,11 @@ void Draw3D::mirror_3d_points(vector<cv::Point3f> &srcWorldPoints, vector<cv::Po
 
 
 
-void Draw3D::setparam_image_perspective_3d(cv::Mat cameraMatrix, cv::Mat disCoffes,
+void Draw3D::setparam_image_perspective_3d(cv::Mat cameraMatrix, cv::Mat distCoeffs,
                         cv::Point3f imgOriPoint, cv::Size imgSizeIn3d, cv::Mat offsetRvec, cv::Mat offsetTvec)
 {
     this->setCameraMatrix = cameraMatrix;
-    this->setDisCoffes = disCoffes;                          
+    this->setDisCoffes = distCoeffs;                          
     this->setImgOriPoint = imgOriPoint;
     this->setImgSizeIn3d = imgSizeIn3d;
     this->setOffsetRvec = offsetRvec;
@@ -239,7 +239,7 @@ void Draw3D::setparam_image_perspective_3d(cv::Mat cameraMatrix, cv::Mat disCoff
 void Draw3D::paste_image_perspective_3d(cv::Mat &srcImageToPaste, cv::Mat &dstImagePasteOn, bool remove_background_color, bool center_image_axis, cv::Mat rvec, cv::Mat tvec)
 {
     cv::Mat cameraMatrix = this->setCameraMatrix;
-    cv::Mat disCoffes = this->setDisCoffes;                            
+    cv::Mat distCoeffs = this->setDisCoffes;                            
     cv::Point3f imgOriPoint = this->setImgOriPoint;
     cv::Size imgSizeIn3d = this->setImgSizeIn3d;
     cv::Mat offsetRvec = this->setOffsetRvec;
@@ -266,7 +266,7 @@ void Draw3D::paste_image_perspective_3d(cv::Mat &srcImageToPaste, cv::Mat &dstIm
     }
 
     vector<cv::Point2f> dstImagePoints2D;
-    cv::projectPoints(srcImagePoints3D, rvec, tvec, cameraMatrix, disCoffes, dstImagePoints2D);
+    cv::projectPoints(srcImagePoints3D, rvec, tvec, cameraMatrix, distCoeffs, dstImagePoints2D);
 
     vector<cv::Point2f> srcImagePoints2D = {cv::Point2f(0, 0), cv::Point2f(0, srcImage.cols),
                                             cv::Point2f(srcImage.rows, 0), cv::Point2f(srcImage.rows, srcImage.cols)};
@@ -301,7 +301,7 @@ void Draw3D::paste_image_perspective_3d(cv::Mat &srcImageToPaste, cv::Mat &dstIm
     //     return;
     // }
     cv::Mat cameraMatrix = this->setCameraMatrix;
-    cv::Mat disCoffes = this->setDisCoffes;                            
+    cv::Mat distCoeffs = this->setDisCoffes;                            
     cv::Point3f imgOriPoint = this->setImgOriPoint;
     cv::Size imgSizeIn3d = this->setImgSizeIn3d;
     cv::Mat offsetRvec = this->setOffsetRvec;
@@ -335,7 +335,7 @@ void Draw3D::paste_image_perspective_3d(cv::Mat &srcImageToPaste, cv::Mat &dstIm
     cv::Mat warpM, _dstImage;
     for(int i = 0; i < rvecs.size(); i++)
     {
-        cv::projectPoints(srcImagePoints3D, rvecs[i], tvecs[i], cameraMatrix, disCoffes, dstImagePoints2D);
+        cv::projectPoints(srcImagePoints3D, rvecs[i], tvecs[i], cameraMatrix, distCoeffs, dstImagePoints2D);
 
         warpM = cv::getPerspectiveTransform(srcImagePoints2D, dstImagePoints2D);
         cv::Mat _dstImage;
@@ -357,7 +357,7 @@ void Draw3D::paste_image_perspective_3d(cv::Mat &srcImageToPaste, cv::Mat &dstIm
     
 }
 void Draw3D::paste_image_perspective_3d(cv::Mat &srcImage, cv::Mat &dstImage, bool remove_background_color, bool center_image_axis, 
-                                    cv::Mat cameraMatrix, cv::Mat disCoffes, cv::Mat rvec, cv::Mat tvec,
+                                    cv::Mat cameraMatrix, cv::Mat distCoeffs, cv::Mat rvec, cv::Mat tvec,
                                     cv::Point3f imgOriPoint, cv::Size imgSizeIn3d, cv::Mat offsetRvec, cv::Mat offsetTvec)
 {
     if(center_image_axis)
@@ -380,7 +380,7 @@ void Draw3D::paste_image_perspective_3d(cv::Mat &srcImage, cv::Mat &dstImage, bo
     }
 
     vector<cv::Point2f> dstImagePoints2D;
-    cv::projectPoints(srcImagePoints3D, rvec, tvec, cameraMatrix, disCoffes, dstImagePoints2D);
+    cv::projectPoints(srcImagePoints3D, rvec, tvec, cameraMatrix, distCoeffs, dstImagePoints2D);
 
     vector<cv::Point2f> srcImagePoints2D = {cv::Point2f(0, 0), cv::Point2f(0, srcImage.cols),
                                             cv::Point2f(srcImage.rows, 0), cv::Point2f(srcImage.rows, srcImage.cols)};

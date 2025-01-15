@@ -103,14 +103,14 @@ int main(int argc, char *argv[])
 
     cv::Size image_size = cv::Size(image_width, image_height);
 
-    cv::Mat cameraMatrix, disCoffes, newCameraMatrix, newDisCoffes;
+    cv::Mat cameraMatrix, distCoeffs, newCameraMatrix, newDisCoffes;
     fs["cameraMatrix"] >> cameraMatrix;
-    fs["disCoffes"] >> disCoffes;
+    fs["distCoeffs"] >> distCoeffs;
     fs["newCameraMatrix"] >> newCameraMatrix;
     fs["newDisCoffes"] >> newDisCoffes;
     fs.release();
     std::cout << cameraMatrix << std::endl;
-    std::cout << disCoffes << std::endl;
+    std::cout << distCoeffs << std::endl;
     std::cout << image_size << std::endl;
 
 
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     Draw3D d3d(28.9, 1, 1, 1);
     cv::Mat testImg = cv::imread("/home/quintinumi/project/camera_calibration_img/1.png"), testImgOp;
     d3d.center_image_scale(testImg, testImg, 1, -1);
-    // CamCalExt Cce(cameraMatrix, disCoffes);
+    // CamCalExt Cce(cameraMatrix, distCoeffs);
     // vector<vector<cv::Point3f>> wp = d3d.draw_ortho_coordinate_3d();
     // vector<cv::Point3f> worldPoints1 = wp[1];
     // vector<cv::Point3f> worldPoints2 = wp[2];
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
         cv::Mat srcImage, undistortedImage, tarImage;
         srcImage = camCal.get_src_image(index);
 
-        Undistortion Und(cameraMatrix, disCoffes, image_size);
+        Undistortion Und(cameraMatrix, distCoeffs, image_size);
         Und.undistortion_process(srcImage, undistortedImage);
 
         
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
         //     // cv::circle(srcImage, imagePoints[i], 2, cv::Scalar(0, 255, 120), -1);
         // }
         
-        // Cce.mapping_3d_to_2d_one_frame(worldPoints, imagePoints, ext[0], ext[1], cameraMatrix, disCoffes);
+        // Cce.mapping_3d_to_2d_one_frame(worldPoints, imagePoints, ext[0], ext[1], cameraMatrix, distCoeffs);
 
         cv::drawChessboardCorners(undistortedImage, chessboardSize, corP, true);
 

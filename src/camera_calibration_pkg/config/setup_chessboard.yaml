@@ -1,6 +1,6 @@
 
-image_load_path: /home/quintinumi/project/camera_calibration_img/
-image_format: png
+image_load_path: /home/quintinumi/project/cam_cal_2025/_hikcamera_image_2_compressed/
+image_format: jpg
 
 # chessboard_width: 6
 # chessboard_height: 9
@@ -11,11 +11,11 @@ image_format: png
 
 yaml_save_path: /home/quintinumi/project/ws_camera_calibration/src/camera_calibration/src/camera_calibration_pkg/config/
 
-chessboard_width: 8
-chessboard_height: 11
-square_size: 25.44
+chessboard_width: 4
+chessboard_height: 3
+square_size: 66
 
 criteria_iter_times: 1000000
 iter_difference: 0.00000001
 
-show_corners_image: true
+show_corners_image: false

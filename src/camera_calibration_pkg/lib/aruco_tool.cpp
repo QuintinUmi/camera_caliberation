@@ -32,7 +32,7 @@ ArucoM::ArucoM()
     this->dParameters = cv::aruco::DetectorParameters::create();
     this->aruco_hash = NULL;
 }
-ArucoM::ArucoM(int dictionaryName, vector<int> selectedIds, vector<float> markerRealLength, cv::Mat cameraMatrix, cv::Mat disCoffes)
+ArucoM::ArucoM(int dictionaryName, vector<int> selectedIds, vector<float> markerRealLength, cv::Mat cameraMatrix, cv::Mat distCoeffs)
 {
     this->markerDictionary = cv::aruco::getPredefinedDictionary(dictionaryName);
     this->selectedIds = selectedIds;
@@ -41,9 +41,9 @@ ArucoM::ArucoM(int dictionaryName, vector<int> selectedIds, vector<float> marker
     {
         this->markerRealLength.emplace_back(markerRealLength[i]);
     }
-    this->set_camera_intrinsics(cameraMatrix, disCoffes);
+    this->set_camera_intrinsics(cameraMatrix, distCoeffs);
 }
-ArucoM::ArucoM(cv::Ptr<cv::aruco::Dictionary> markerDictionary, vector<int> selectedIds, vector<float> markerRealLength, cv::Mat cameraMatrix, cv::Mat disCoffes)
+ArucoM::ArucoM(cv::Ptr<cv::aruco::Dictionary> markerDictionary, vector<int> selectedIds, vector<float> markerRealLength, cv::Mat cameraMatrix, cv::Mat distCoeffs)
 {
     this->markerDictionary = markerDictionary;
     this->selectedIds = selectedIds;
@@ -52,7 +52,7 @@ ArucoM::ArucoM(cv::Ptr<cv::aruco::Dictionary> markerDictionary, vector<int> sele
     {
         this->markerRealLength.emplace_back(markerRealLength[i]);
     }
-    this->set_camera_intrinsics(cameraMatrix, disCoffes);
+    this->set_camera_intrinsics(cameraMatrix, distCoeffs);
 }
 ArucoM::~ArucoM()
 {
@@ -132,10 +132,10 @@ void ArucoM::set_aruco_real_length(vector<float> markerRealLength)
         this->markerRealLength.emplace_back(markerRealLength[i]);
     }
 }
-void ArucoM::set_camera_intrinsics(cv::Mat cameraMatrix, cv::Mat disCoffes)
+void ArucoM::set_camera_intrinsics(cv::Mat cameraMatrix, cv::Mat distCoeffs)
 {
     this->cameraMatrix = cameraMatrix;
-    this->disCoffes = disCoffes;
+    this->distCoeffs = distCoeffs;
 }
 
 
@@ -224,7 +224,7 @@ void ArucoM::ext_calib_single_arucos(cv::Mat &inputImage, int targetId,
     {
         // std::cout << this->cameraMatrix << std::endl;
         std::cout << markerIds[indexId] << std::endl;
-        cv::aruco::estimatePoseSingleMarkers(selectedCorners, this->markerRealLength[this->aruco_hash[targetId]], this->cameraMatrix, this->disCoffes, rvecs3d, tvecs3d);
+        cv::aruco::estimatePoseSingleMarkers(selectedCorners, this->markerRealLength[this->aruco_hash[targetId]], this->cameraMatrix, this->distCoeffs, rvecs3d, tvecs3d);
         int vecSize = selectedCorners.size();
         for(int j = 0; j < vecSize; j++)
         {
@@ -296,7 +296,7 @@ void ArucoM::ext_calib_multipul_arucos(cv::Mat &inputImage, vector<cv::Mat> &rve
     if(!selectedCorners.empty())
     {
         // std::cout << this->cameraMatrix << std::endl;
-        cv::aruco::estimatePoseSingleMarkers(selectedCorners, this->markerRealLength[indexId], this->cameraMatrix, this->disCoffes, rvecs3d, tvecs3d);
+        cv::aruco::estimatePoseSingleMarkers(selectedCorners, this->markerRealLength[indexId], this->cameraMatrix, this->distCoeffs, rvecs3d, tvecs3d);
         int vecSize = selectedCorners.size();
         for(int j = 0; j < vecSize; j++)
         {

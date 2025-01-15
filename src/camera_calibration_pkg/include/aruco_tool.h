@@ -30,8 +30,8 @@ class ArucoM{
     public:
 
         ArucoM();
-        ArucoM(int dictionaryName, vector<int> selectedIds, vector<float> markerRealLength = vector<float>{1.0}, cv::Mat cameraMatrix = cv::Mat(), cv::Mat disCoffes = cv::Mat());
-        ArucoM(cv::Ptr<cv::aruco::Dictionary> markerDictionary, vector<int> selectedIds, vector<float> markerRealLength = vector<float>{1.0}, cv::Mat cameraMatrix = cv::Mat(), cv::Mat disCoffes = cv::Mat());
+        ArucoM(int dictionaryName, vector<int> selectedIds, vector<float> markerRealLength = vector<float>{1.0}, cv::Mat cameraMatrix = cv::Mat(), cv::Mat distCoeffs = cv::Mat());
+        ArucoM(cv::Ptr<cv::aruco::Dictionary> markerDictionary, vector<int> selectedIds, vector<float> markerRealLength = vector<float>{1.0}, cv::Mat cameraMatrix = cv::Mat(), cv::Mat distCoeffs = cv::Mat());
         ~ArucoM();
 
         void create();
@@ -43,7 +43,7 @@ class ArucoM{
         void set_aruco(cv::Ptr<cv::aruco::Dictionary> markerDictionary, vector<int> selectedIds, vector<float> markerRealLength = vector<float>{1.0});
         void sel_aruco_ids(vector<int> selectedIds);
         void set_aruco_real_length(vector<float> markerRealLength);
-        void set_camera_intrinsics(cv::Mat cameraMatrix, cv::Mat disCoffes);
+        void set_camera_intrinsics(cv::Mat cameraMatrix, cv::Mat distCoeffs);
 
         vector<cv::Mat> generate_aruco_marker(int markerSize);
         vector<cv::Mat> generate_aruco_marker(int dictionaryName, vector<int> selectedIds, int markerSize);
@@ -75,7 +75,7 @@ class ArucoM{
         vector<float> markerRealLength;
 
         cv::Mat cameraMatrix;
-        cv::Mat disCoffes;
+        cv::Mat distCoeffs;
 
 };
 
